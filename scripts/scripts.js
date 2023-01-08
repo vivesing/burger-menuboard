@@ -1,8 +1,6 @@
 import {
   sampleRUM,
   buildBlock,
-  loadHeader,
-  loadFooter,
   decorateButtons,
   decorateIcons,
   decorateSections,
@@ -22,7 +20,17 @@ function buildHeroBlock(main) {
   // eslint-disable-next-line no-bitwise
   if (h1 && picture && (h1.compareDocumentPosition(picture) & Node.DOCUMENT_POSITION_PRECEDING)) {
     const section = document.createElement('div');
-    section.append(buildBlock('hero', { elems: [picture, h1] }));
+    let heroBlock = buildBlock('hero', { elems: [picture] });
+    if (h1) {
+      let textBackgroundImgElement = document.createElement('img');
+      textBackgroundImgElement.src = '../images/yellow-background.png';
+      let textBackgroundImgWrapper = document.createElement('div');
+      textBackgroundImgWrapper.className = 'hero-text-background';
+      textBackgroundImgWrapper.appendChild(textBackgroundImgElement);
+      textBackgroundImgWrapper.appendChild(h1);
+      heroBlock.appendChild(textBackgroundImgWrapper);
+    }
+    section.append(heroBlock);
     main.prepend(section);
   }
 }
@@ -52,6 +60,45 @@ export function decorateMain(main) {
   buildAutoBlocks(main);
   decorateSections(main);
   decorateBlocks(main);
+  editMenu(main);
+}
+
+const editMenu = (main) => {
+  // let heroBlock = main.querySelector('.hero');
+  // [...heroBlock.children].forEach((childDiv) => {
+  //   if (childDiv) {
+  //     childDiv.children[1].style['text-align'] = 'center';
+  //   }
+  // })
+  let menuItems = main.querySelector('.main-menu');
+  [...menuItems.children].forEach((childDiv) => {
+    if (childDiv && childDiv.children && childDiv.children.length === 2) {
+      childDiv.children[1].style['text-align'] = 'center';
+    }
+  })
+  let notices = main.querySelector('.notices');
+  let menuNoticeContainer = document.createElement('div');
+  menuNoticeContainer.classList.add('menu-notice-container');
+  menuNoticeContainer.appendChild(menuItems);
+  menuNoticeContainer.appendChild(notices);
+  let promotions = main.querySelector('.promotions');
+  [...promotions.children].forEach((childDiv) => {
+    childDiv.children[1].style.display = 'none';
+    childDiv.children[1].style.display = 'none';
+  })
+  let offers = main.querySelector('.offers');
+  [...offers.children].forEach((childDiv) => {
+    childDiv.children[1].style.display = 'none';
+  })
+  let container = document.createElement('div');
+  container.classList.add('menu-container');
+  let leftMargin = document.createElement('div');
+  leftMargin.classList.add('menu-left-margin');
+  container.appendChild(leftMargin);
+  container.appendChild(menuNoticeContainer);
+  container.appendChild(promotions);
+  main.appendChild(container);
+  main.appendChild(offers);
 }
 
 /**
@@ -60,7 +107,7 @@ export function decorateMain(main) {
 async function loadEager(doc) {
   document.documentElement.lang = 'en';
   decorateTemplateAndTheme();
-  const main = doc.querySelector('main');
+  let main = doc.querySelector('main');
   if (main) {
     decorateMain(main);
     await waitForLCP(LCP_BLOCKS);
@@ -95,8 +142,8 @@ async function loadLazy(doc) {
   const element = hash ? main.querySelector(hash) : false;
   if (hash && element) element.scrollIntoView();
 
-  loadHeader(doc.querySelector('header'));
-  loadFooter(doc.querySelector('footer'));
+  // loadHeader(doc.querySelector('header'));
+  // loadFooter(doc.querySelector('footer'));
 
   loadCSS(`${window.hlx.codeBasePath}/styles/lazy-styles.css`);
   addFavIcon(`${window.hlx.codeBasePath}/styles/favicon.svg`);
