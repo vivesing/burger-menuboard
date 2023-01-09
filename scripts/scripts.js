@@ -136,95 +136,72 @@ export function addFavIcon(href) {
   }
 }
 
-function personalizedContent(apiResponse, doc) {
-  let dataArray = apiResponse.data;
+const createMenu = (menublock, dataArray) => {
+  for (let index = 0; index < dataArray.length; index++) {
 
-  if (dataArray && dataArray.length > 0) {
-    for (let index = 0; index < dataArray.length; index++) {
-      var currentRowId = parseInt(dataArray[index].ID, 10);
-      var menuSection = dataArray[index].Section;
-      var isOutOfStock = dataArray[index]['isOutOfStock'];
-      var totalElementsOnMenu = doc.getElementsByClassName("columns " + menuSection)[0].childElementCount;
+    let product = dataArray[index].Product;
+    let price = dataArray[index].Price;
+    let isOutOfStock = dataArray[index]['isOutOfStock'];
+    if (product && !isOutOfStock && (!price || price === '')) {
+      let heading = document.createElement('div');
+      let headingWrapper = document.createElement('div');
+      let productText = document.createElement('h4');
+      productText.innerText = product;
+      headingWrapper.appendChild(productText);
+      heading.appendChild(headingWrapper);
+      menublock.appendChild(heading)
 
-      if (currentRowId < totalElementsOnMenu) {
-        // Mutate the existing menu item
-        doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[0].textContent = dataArray[index].Item;
-        doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[1].textContent = dataArray[index].Tall;
-        doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[2].textContent = dataArray[index].Grande;
-        doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[3].textContent = dataArray[index].Venti;
-
-        if (outOfStock === 'Yes') {
-          doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[0].style.textDecoration = "line-through";
-          doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[0].style.color = 'red';
-          doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[1].style.textDecoration = "line-through";
-          doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[1].style.color = 'red';
-          doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[2].style.textDecoration = "line-through";
-          doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[2].style.color = 'red';
-          doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[3].style.textDecoration = "line-through";
-          doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[3].style.color = 'red';
+      let counter = index+1;
+      while (counter < dataArray.length) {
+        let product2 = dataArray[counter].Product;
+        let price2 = dataArray[counter].Price;
+        let isOutOfStock2 = dataArray[counter]['isOutOfStock'];
+        if (product2 && price2 && price2 !== '' && !isOutOfStock2) {
+          let heading = document.createElement('div');
+          let name = document.createElement('div');
+          name.innerText = product2;
+          let rate = document.createElement('div');
+          rate.style['text-align'] = 'center';
+          rate.innerText = '$' + price2;
+          heading.appendChild(name);
+          heading.appendChild(rate);
+          menublock.appendChild(heading);
+        } else if (!price2 || price2 === '') {
+          break;
         }
-
-        if (outOfStock !== 'Yes') {
-          doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[0].style.textDecoration = "";
-          doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[0].style.color = "";
-          doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[1].style.textDecoration = "";
-          doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[1].style.color = "";
-          doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[2].style.textDecoration = "";
-          doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[2].style.color = "";
-          doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[3].style.textDecoration = "";
-          doc.getElementsByClassName("columns " + menuSection)[0].children[currentRowId].children[3].style.color = "";
-        }
-
-      } else if (currentRowId >= totalElementsOnMenu) {
-
-        // Add the new menu item
-        const parentDiv = document.createElement("div");
-
-        const itemDiv = document.createElement("div");
-        itemDiv.textContent = dataArray[index].Item;
-        parentDiv.appendChild(itemDiv);
-
-        const tallDiv = document.createElement("div");
-        tallDiv.textContent = dataArray[index].Tall;
-        parentDiv.appendChild(tallDiv);
-
-        const grandeDiv = document.createElement("div");
-        grandeDiv.textContent = dataArray[index].Grande;
-        parentDiv.appendChild(grandeDiv);
-
-        const ventiDiv = document.createElement("div");
-        ventiDiv.textContent = dataArray[index].Venti;
-        parentDiv.appendChild(ventiDiv);
-
-        doc.getElementsByClassName("columns " + menuSection)[0].appendChild(parentDiv);
+        counter++;
       }
     }
   }
 }
 
-function applyPromo(response, doc) {
-  if (response.promo && response.weather) {
-    let isDisplayPromo = response.promo?.data[0]?.isDisplayPromo;
-    if (isDisplayPromo === 'true') {
-      // hide qr-code
-      doc.getElementsByClassName('qr-code')[0].style.display = 'none';
-      // weather based drink
-      let temperature = response.weather?.data[0]?.temperature;
-      if (temperature < 50) {
-        // display hot beverage
-        doc.getElementsByClassName("promo")[0].children[0].children[0].style.display = "block";
-        doc.getElementsByClassName("promo")[0].children[0].children[1].style.display = "none";
-      } else {
-        // display cold beverage
-        doc.getElementsByClassName("promo")[0].children[0].children[0].style.display = "none";
-        doc.getElementsByClassName("promo")[0].children[0].children[1].style.display = "block";
+const updatePromotionPrices = (promotions, dataArray) => {
+  if (!promotions || promotions.length === 0) {
+    return;
+  }
+  [...promotions].forEach((promotion) => {
+    let product = promotion.children[2] ? promotion.children[2].innerText.toLowerCase() : null;
+    if (product) {
+      for (let index=0; index < dataArray.length; index++) {
+        let name = dataArray[index].Product ? dataArray[index].Product.toLowerCase() : null;
+        if (name === product) {
+          let price = dataArray[index].Price;
+          promotion.children[0].children[0].children[0].innerText = '$' + price;
+        }
       }
-    } else {
-      // display qr-code
-      doc.getElementsByClassName("promo")[0].children[0].children[0].style.display = "none";
-      doc.getElementsByClassName("promo")[0].children[0].children[1].style.display = "none";
-      doc.getElementsByClassName('qr-code')[0].style.display = 'block';
     }
+  })
+}
+
+function personalizedContent(apiResponse, doc) {
+  let dataArray = apiResponse.data;
+
+  if (dataArray && dataArray.length > 0) {
+    let menublock = doc.getElementsByClassName('main-menu')[0];
+    menublock.innerHTML = '';
+    createMenu(menublock, dataArray);
+    let promotions = doc.getElementsByClassName('promotion-container');
+    updatePromotionPrices(promotions, dataArray);
   }
 }
 
@@ -254,7 +231,7 @@ const poll = ( fn, doc, url ) => {
 
   let interval = localStorage.getItem('franklinPollInterval');
   if (!interval) {
-    interval = 5000;
+    interval = 1000;
   }
   console.log('Start poll...');
   setTimeout(function() {
@@ -276,7 +253,6 @@ async function loadLazy(doc) {
   // loadHeader(doc.querySelector('header'));
   // loadFooter(doc.querySelector('footer'));
   poll(personalizedContent, doc, 'franklinTargetAPI');
-  poll(applyPromo, doc, 'franklinPromoAPI');
 
   loadCSS(`${window.hlx.codeBasePath}/styles/lazy-styles.css`);
   addFavIcon(`${window.hlx.codeBasePath}/styles/favicon.svg`);

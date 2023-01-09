@@ -269,22 +269,22 @@ main .section.highlight {
 }
 
 .main-menu {
-  padding: 5% 12% 0;
+  padding: 2% 12% 0;
   width: 80%;
 }
 
 .main-menu h4 {
-  width: 95%;
+  width: 100%;
   color: #e89e31;
   font-family: Copperplate, Helvetica, sans-serif;
   font-weight: lighter;
-  font-size: large;
+  font-size: x-large;
 }
 
 .main-menu div {
   color: white;
   font-family: Courier, Helvetica, sans-serif;
-  font-size: medium;
+  font-size: small;
   font-weight: lighter;
 }
 
@@ -320,9 +320,8 @@ main .section.highlight {
 .promotion-price {
   position: absolute;
   border: 1px solid white;
-  height: 14%;
+  height: 13.5%;
   width: 50%;
-  margin: 50px;
   border-radius: 50%;
   left: -21%;
 }
@@ -333,8 +332,8 @@ main .section.highlight {
   height: 90%;
   width: 90%;
   border-radius: 50%;
-  left: 5.7%;
-  top: 5.7%;
+  left: 5.6%;
+  top: 5.6%;
   text-align: center;
   color: black;
   font-weight: bolder;
