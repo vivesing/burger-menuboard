@@ -308,6 +308,24 @@ main .section.highlight {
   width: 95%;
 }
 
+#offer-animation {
+  animation-name: bounce;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-duration: 1s;
+  animation-timing-function: ease-in;
+}
+
+@keyframes bounce {
+  from {
+    margin-left: -10%;
+  }
+
+  to {
+    margin-left: 0;
+  }
+}
+
 .promotion-container {
   display: block;
 }

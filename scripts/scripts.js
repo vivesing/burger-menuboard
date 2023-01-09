@@ -94,6 +94,7 @@ const editMenu = (main) => {
   let offers = main.querySelector('.offers');
   [...offers.children].forEach((childDiv) => {
     childDiv.children[1].style.display = 'none';
+    childDiv.children[0].children[0].children[3].id = 'offer-animation';
   })
   promotions.appendChild(offers);
   let container = document.createElement('div');
