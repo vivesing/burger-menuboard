@@ -136,6 +136,8 @@ export function addFavIcon(href) {
   }
 }
 
+let prices = {};
+
 const createMenu = (menublock, dataArray) => {
   for (let index = 1; index < dataArray.length; index++) {
 
@@ -147,6 +149,7 @@ const createMenu = (menublock, dataArray) => {
     let sku = rowData.length > 1 ? rowData[1] : null;
     let price = rowData.length > 2 ? rowData[2] : null;
     let isOutOfStock = rowData.length > 3 ? rowData[3] : null;
+    prices[sku] = price;
     if (product && !isOutOfStock && (!price || price === '')) {
       let heading = document.createElement('div');
       let headingWrapper = document.createElement('div');
@@ -163,6 +166,7 @@ const createMenu = (menublock, dataArray) => {
         let sku2 = rowData2.length > 1 ? rowData2[1] : null;
         let price2 = rowData2.length > 2 ? rowData2[2] : null;
         let isOutOfStock2 = rowData2.length > 3 ? rowData2[3] : null;
+        prices[sku2] = price2;
         if (product2 && price2 && price2 !== '' && !isOutOfStock2) {
           let heading = document.createElement('div');
           let name = document.createElement('div');
@@ -228,6 +232,9 @@ const processMenuItemsPersonalization = (index, dataArray, doc) => {
     }
     let itemName = doc.getElementsByClassName(`${rowData[0]}-name`)[0];
     let itemPrice = doc.getElementsByClassName(`${rowData[0]}-price`)[0];
+    if (rowData.length > 2 && rowData[3]) {
+      itemName.innerText = rowData[3];
+    }
     itemPrice.innerText = '$' + rowData[1];
     if (rowData[2] && rowData[2].toLowerCase() === 'true') {
       itemName.classList.add('out-of-stock');
@@ -269,9 +276,56 @@ const processPromotionsPersonalization = (index, dataArray, doc) => {
       promotion.children[1].children[0].children[2].srcset = rowData[0];
       promotion.children[1].children[0].children[3].src = rowData[0];
     } else {
-
+      let promotions = doc.getElementsByClassName('promotions')[0];
+      if (promotions.children.length > 3) {
+        promotions.children[0].children[0].children[0].children[0].innerText = '$' + prices[rowData[1]];
+        promotions.children[0].children[1].children[0].children[0].srcset = rowData[0];
+        promotions.children[0].children[1].children[0].children[1].srcset = rowData[0];
+        promotions.children[0].children[1].children[0].children[2].srcset = rowData[0];
+        promotions.children[0].children[1].children[0].children[3].src = rowData[0];
+      } else {
+        let promotions = doc.getElementsByClassName('promotions')[0];
+        let newPromotion = promotions.children[0].cloneNode(true);
+        newPromotion.children[0].children[0].children[0].children[0].innerText = '$' + prices[rowData[1]];
+        newPromotion.children[0].children[1].children[0].children[0].srcset = rowData[0];
+        newPromotion.children[0].children[1].children[0].children[1].srcset = rowData[0];
+        newPromotion.children[0].children[1].children[0].children[2].srcset = rowData[0];
+        newPromotion.children[0].children[1].children[0].children[3].src = rowData[0];
+        newPromotion.insertBefore(promotions.children[0]);
+      }
     }
     counter++;
+  }
+}
+
+const processOffersBlockPersonalization = (index, dataArray, doc) => {
+  let counter = index + 2;
+  let rowData = dataArray[counter];
+  if (!rowData || rowData.length < 2) {
+    return;
+  }
+  let offer = doc.getElementsByClassName('offers')[0];
+  if (rowData[0]) {
+    offer.children[0].children[0].children[0].children[0].srcset = rowData[0];
+    offer.children[0].children[0].children[0].children[1].srcset = rowData[0];
+    offer.children[0].children[0].children[0].children[2].srcset = rowData[0];
+    offer.children[0].children[0].children[0].children[3].src = rowData[0];
+  }
+}
+
+const processNoticesPersonalization = (index, dataArray, doc) => {
+  let counter = index + 1;
+  let rowData = dataArray[counter];
+  if (!rowData || rowData.length < 1) {
+    return;
+  }
+  let notices = doc.getElementsByClassName('notices')[0];
+  if (rowData[0]) {
+    let newNotice = notices.children[0].cloneNode(true);
+    newNotice.children[0].innerText = rowData[0];
+    if (rowData[0] !== notices.children[0].children[0].innerText) {
+      notices.insertBefore(newNotice, notices.children[0]);
+    }
   }
 }
 
@@ -291,6 +345,12 @@ const applyPersonalization = (apiResponse, doc) => {
       }
       if (rowData[0].toLowerCase().includes('promotions')) {
         processPromotionsPersonalization(index, dataArray, doc);
+      }
+      if (rowData[0].toLowerCase().includes('offers')) {
+        processOffersBlockPersonalization(index, dataArray, doc);
+      }
+      if (rowData[0].toLowerCase().includes('notice')) {
+        processNoticesPersonalization(index, dataArray, doc);
       }
     }
   }
@@ -314,12 +374,10 @@ async function pollAPI(fn, url, doc, interval) {
   }
 }
 
-const poll = ( fn, doc, url) => {
+const poll = async (fn, doc, url) => {
   let interval = 30000;
   console.log('Start poll...');
-  setTimeout(function() {
-    pollAPI(fn, url, doc, interval);
-  }, interval);
+  await pollAPI(fn, url, doc, interval);
 };
 
 /**
@@ -335,8 +393,8 @@ async function loadLazy(doc) {
 
   // loadHeader(doc.querySelector('header'));
   // loadFooter(doc.querySelector('footer'));
-  poll(personalizedContent, doc, 'https://sheets.googleapis.com/v4/spreadsheets/1Iwke95E7vaAdfErTZPk-S5QXMQ0j3-BqCWvtI0zTn14/values/sheet1?key=AIzaSyBQRjtsLve-sGmkdMoOKypccTZEGaRK7E8');
-  poll(applyPersonalization, doc, 'https://sheets.googleapis.com/v4/spreadsheets/1RP6Bm4xtcEwWMDP3J2TMRAlEN7_DyuZCaa47GCh_6ZU/values/sheet1?key=AIzaSyBQRjtsLve-sGmkdMoOKypccTZEGaRK7E8');
+  await poll(personalizedContent, doc, 'https://sheets.googleapis.com/v4/spreadsheets/1Iwke95E7vaAdfErTZPk-S5QXMQ0j3-BqCWvtI0zTn14/values/sheet1?key=AIzaSyBQRjtsLve-sGmkdMoOKypccTZEGaRK7E8');
+  await poll(applyPersonalization, doc, 'https://sheets.googleapis.com/v4/spreadsheets/1RP6Bm4xtcEwWMDP3J2TMRAlEN7_DyuZCaa47GCh_6ZU/values/sheet1?key=AIzaSyBQRjtsLve-sGmkdMoOKypccTZEGaRK7E8');
 
   loadCSS(`${window.hlx.codeBasePath}/styles/lazy-styles.css`);
   addFavIcon(`${window.hlx.codeBasePath}/styles/favicon.svg`);
