@@ -17,6 +17,7 @@ window.hlx.RUM_GENERATION = 'project-1'; // add your RUM generation information 
 function buildHeroBlock(main) {
   const h1 = main.querySelector('h1');
   const picture = main.querySelector('picture');
+  picture.classList.add('hero-picture');
   // eslint-disable-next-line no-bitwise
   if (h1 && picture && (h1.compareDocumentPosition(picture) & Node.DOCUMENT_POSITION_PRECEDING)) {
     const section = document.createElement('div');
@@ -78,17 +79,14 @@ const editMenu = (main) => {
   let promotions = main.querySelector('.promotions');
   [...promotions.children].forEach((childDiv) => {
     childDiv.classList.add('promotion-container');
+    childDiv.classList.add(`${childDiv.children[1].innerText}`);
     childDiv.children[0].classList.add('promotion-image');
     childDiv.children[1].style.display = 'none';
     let promotionPriceElement = document.createElement('div');
     promotionPriceElement.classList.add('promotion-price');
     let inner = document.createElement('div');
     inner.classList.add('inner');
-    if (childDiv.children[2]) {
-      inner.innerHTML = `<p>${childDiv.children[2].innerText}</p>`;
-    } else {
-      inner.innerHTML = `<p></p>`;
-    }
+    inner.innerHTML = `<p></p>`;
     promotionPriceElement.appendChild(inner);
     childDiv.insertBefore(promotionPriceElement, childDiv.children[0]);
   })
@@ -168,9 +166,11 @@ const createMenu = (menublock, dataArray) => {
         if (product2 && price2 && price2 !== '' && !isOutOfStock2) {
           let heading = document.createElement('div');
           let name = document.createElement('div');
+          name.classList.add(`${sku2}-name`);
           name.innerText = product2;
           let rate = document.createElement('div');
           rate.style['text-align'] = 'center';
+          rate.classList.add(`${sku2}-price`);
           rate.innerText = '$' + price2;
           heading.appendChild(name);
           heading.appendChild(rate);
@@ -219,6 +219,83 @@ function personalizedContent(apiResponse, doc) {
   }
 }
 
+const processMenuItemsPersonalization = (index, dataArray, doc) => {
+  let counter = index + 2;
+  while(counter < dataArray.length) {
+    let rowData = dataArray[counter];
+    if (!rowData || rowData.length < 2 || !rowData[0].includes('SKU')) {
+      break;
+    }
+    let itemName = doc.getElementsByClassName(`${rowData[0]}-name`)[0];
+    let itemPrice = doc.getElementsByClassName(`${rowData[0]}-price`)[0];
+    itemPrice.innerText = '$' + rowData[1];
+    if (rowData[2] && rowData[2].toLowerCase() === 'true') {
+      itemName.classList.add('out-of-stock');
+    }
+    counter++;
+  }
+}
+
+const processHeroBlockPersonalization = (index, dataArray, doc) => {
+  let counter = index + 2;
+  let rowData = dataArray[counter];
+  if (!rowData || rowData.length < 2) {
+    return;
+  }
+  let heroImage = doc.getElementsByClassName('hero-picture')[0];
+  if (rowData[0]) {
+    heroImage.children[0].srcset = rowData[0];
+    heroImage.children[1].srcset = rowData[0];
+    heroImage.children[2].srcset = rowData[0];
+    heroImage.children[3].src = rowData[0];
+  }
+  let title = doc.getElementsByClassName('hero-text-background')[0];
+  if (rowData[1]) {
+    title.children[1].innerText = rowData[1];
+  }
+}
+
+const processPromotionsPersonalization = (index, dataArray, doc) => {
+  let counter = index + 2;
+  while(counter < dataArray.length) {
+    let rowData = dataArray[counter];
+    if (!rowData || rowData.length < 2 || !rowData[1].includes('SKU')) {
+      break;
+    }
+    let promotion = doc.getElementsByClassName(rowData[1])[0];
+    if (promotion) {
+      promotion.children[1].children[0].children[0].srcset = rowData[0];
+      promotion.children[1].children[0].children[1].srcset = rowData[0];
+      promotion.children[1].children[0].children[2].srcset = rowData[0];
+      promotion.children[1].children[0].children[3].src = rowData[0];
+    } else {
+
+    }
+    counter++;
+  }
+}
+
+const applyPersonalization = (apiResponse, doc) => {
+  let dataArray = apiResponse.values;
+  if (dataArray && dataArray.length > 0) {
+    for (let index=0; index < dataArray.length; index++) {
+      let rowData = dataArray[index];
+      if (!rowData || rowData.length === 0) {
+        continue;
+      }
+      if (rowData[0].toLowerCase().includes('menu') && rowData[0].toLowerCase().includes('item')) {
+        processMenuItemsPersonalization(index, dataArray, doc);
+      }
+      if (rowData[0].toLowerCase().includes('hero') && rowData[0].toLowerCase().includes('block')) {
+        processHeroBlockPersonalization(index, dataArray, doc);
+      }
+      if (rowData[0].toLowerCase().includes('promotions')) {
+        processPromotionsPersonalization(index, dataArray, doc);
+      }
+    }
+  }
+};
+
 async function pollAPI(fn, url, doc, interval) {
   try {
     let response = await fetch(url);
@@ -237,16 +314,11 @@ async function pollAPI(fn, url, doc, interval) {
   }
 }
 
-const poll = ( fn, doc) => {
-  let targetApi = 'https://sheets.googleapis.com/v4/spreadsheets/1Iwke95E7vaAdfErTZPk-S5QXMQ0j3-BqCWvtI0zTn14/values/sheet1?key=AIzaSyBQRjtsLve-sGmkdMoOKypccTZEGaRK7E8';
-
-  let interval = localStorage.getItem('franklinPollInterval');
-  if (!interval) {
-    interval = 200;
-  }
+const poll = ( fn, doc, url) => {
+  let interval = 30000;
   console.log('Start poll...');
   setTimeout(function() {
-    pollAPI(fn, targetApi, doc, interval);
+    pollAPI(fn, url, doc, interval);
   }, interval);
 };
 
@@ -263,7 +335,8 @@ async function loadLazy(doc) {
 
   // loadHeader(doc.querySelector('header'));
   // loadFooter(doc.querySelector('footer'));
-  poll(personalizedContent, doc, 'franklinTargetAPI');
+  poll(personalizedContent, doc, 'https://sheets.googleapis.com/v4/spreadsheets/1Iwke95E7vaAdfErTZPk-S5QXMQ0j3-BqCWvtI0zTn14/values/sheet1?key=AIzaSyBQRjtsLve-sGmkdMoOKypccTZEGaRK7E8');
+  poll(applyPersonalization, doc, 'https://sheets.googleapis.com/v4/spreadsheets/1RP6Bm4xtcEwWMDP3J2TMRAlEN7_DyuZCaa47GCh_6ZU/values/sheet1?key=AIzaSyBQRjtsLve-sGmkdMoOKypccTZEGaRK7E8');
 
   loadCSS(`${window.hlx.codeBasePath}/styles/lazy-styles.css`);
   addFavIcon(`${window.hlx.codeBasePath}/styles/favicon.svg`);
