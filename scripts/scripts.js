@@ -382,7 +382,7 @@ async function pollAPI(fn1, fn2, url1, url2, doc) {
   finally {
     setTimeout(function() {
       pollAPI(fn1, fn2, url1, url2, doc);
-    }, 10000);
+    }, 30000);
   }
 }
 
