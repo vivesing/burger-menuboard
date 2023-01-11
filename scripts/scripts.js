@@ -167,11 +167,13 @@ const createMenu = (menublock, dataArray) => {
         let price2 = rowData2.length > 2 ? rowData2[2] : null;
         let isOutOfStock2 = rowData2.length > 3 ? rowData2[3] : null;
         prices[sku2] = price2;
-        if (product2 && price2 && price2 !== '' && !isOutOfStock2) {
+        if (product2 && price2 && price2 !== '') {
           let heading = document.createElement('div');
           let name = document.createElement('div');
           name.classList.add(`${sku2}-name`);
           name.innerText = product2;
+          if (isOutOfStock2)
+            name.classList.add('out-of-stock');
           let rate = document.createElement('div');
           rate.style['text-align'] = 'center';
           rate.classList.add(`${sku2}-price`);
@@ -179,7 +181,7 @@ const createMenu = (menublock, dataArray) => {
           heading.appendChild(name);
           heading.appendChild(rate);
           menublock.appendChild(heading);
-        } else if (!price2 || price2 === '') {
+        } else {
           break;
         }
         counter++;
@@ -227,16 +229,14 @@ const processMenuItemsPersonalization = (index, dataArray, doc) => {
   let counter = index + 2;
   while(counter < dataArray.length) {
     let rowData = dataArray[counter];
-    if (!rowData || rowData.length < 2 || !rowData[0].includes('SKU')) {
+    if (!rowData || rowData.length === 0 || !rowData[0].includes('SKU')) {
       break;
     }
     let itemName = doc.getElementsByClassName(`${rowData[0]}-name`)[0];
-    let itemPrice = doc.getElementsByClassName(`${rowData[0]}-price`)[0];
-    if (rowData.length > 2 && rowData[3]) {
-      itemName.innerText = rowData[3];
+    if (rowData.length > 2 && rowData[2]) {
+      itemName.innerText = rowData[2];
     }
-    itemPrice.innerText = '$' + rowData[1];
-    if (rowData[2] && rowData[2].toLowerCase() === 'true') {
+    if (rowData[1] && rowData[1].toLowerCase() === 'true') {
       itemName.classList.add('out-of-stock');
     }
     counter++;
@@ -356,29 +356,35 @@ const applyPersonalization = (apiResponse, doc) => {
   }
 };
 
-async function pollAPI(fn, url, doc, interval) {
+async function pollAPI(fn1, fn2, url1, url2, doc) {
   try {
-    let response = await fetch(url);
-    if (response.status === 200) {
-      let apiResponse = await response.json();
-      console.log(" API response received: " + JSON.stringify(apiResponse));
-      fn(apiResponse, doc);
+    let apiResponse1, apiResponse2;
+    let response1 = await fetch(url1);
+    if (response1.status === 200) {
+      apiResponse1 = await response1.json();
+      console.log(" API response received: " + JSON.stringify(apiResponse1));
     }
+    let response2 = await fetch(url2);
+    if (response2.status === 200) {
+      apiResponse2 = await response2.json();
+      console.log(" API response received: " + JSON.stringify(apiResponse2));
+    }
+    if (response1.status === 200) {
+      fn1(apiResponse1, doc);
+    }
+    if (response2.status === 200) {
+      fn2(apiResponse2, doc);
+    }
+
   } catch (error) {
     console.log(JSON.stringify(error));
   }
   finally {
     setTimeout(function() {
-      pollAPI(fn, url, doc, interval);
-    }, interval);
+      pollAPI(fn1, fn2, url1, url2, doc);
+    }, 10000);
   }
 }
-
-const poll = async (fn, doc, url) => {
-  let interval = 30000;
-  console.log('Start poll...');
-  await pollAPI(fn, url, doc, interval);
-};
 
 /**
  * loads everything that doesn't need to be delayed.
@@ -393,8 +399,7 @@ async function loadLazy(doc) {
 
   // loadHeader(doc.querySelector('header'));
   // loadFooter(doc.querySelector('footer'));
-  await poll(personalizedContent, doc, 'https://sheets.googleapis.com/v4/spreadsheets/1Iwke95E7vaAdfErTZPk-S5QXMQ0j3-BqCWvtI0zTn14/values/sheet1?key=AIzaSyBQRjtsLve-sGmkdMoOKypccTZEGaRK7E8');
-  await poll(applyPersonalization, doc, 'https://sheets.googleapis.com/v4/spreadsheets/1RP6Bm4xtcEwWMDP3J2TMRAlEN7_DyuZCaa47GCh_6ZU/values/sheet1?key=AIzaSyBQRjtsLve-sGmkdMoOKypccTZEGaRK7E8');
+  await pollAPI(personalizedContent, applyPersonalization, 'https://sheets.googleapis.com/v4/spreadsheets/1Iwke95E7vaAdfErTZPk-S5QXMQ0j3-BqCWvtI0zTn14/values/sheet1?key=AIzaSyBQRjtsLve-sGmkdMoOKypccTZEGaRK7E8', 'https://sheets.googleapis.com/v4/spreadsheets/1RP6Bm4xtcEwWMDP3J2TMRAlEN7_DyuZCaa47GCh_6ZU/values/sheet1?key=AIzaSyBQRjtsLve-sGmkdMoOKypccTZEGaRK7E8', doc);
 
   loadCSS(`${window.hlx.codeBasePath}/styles/lazy-styles.css`);
   addFavIcon(`${window.hlx.codeBasePath}/styles/favicon.svg`);

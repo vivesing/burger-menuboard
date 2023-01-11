@@ -363,3 +363,7 @@ main .section.highlight {
   margin-top: 25%;
   margin-left: 32%;
 }
+
+.out-of-stock {
+  text-decoration: line-through;
+}
