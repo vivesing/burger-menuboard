@@ -80,13 +80,14 @@ const editMenu = (main) => {
     childDiv.classList.add('promotion-container');
     childDiv.children[0].classList.add('promotion-image');
     childDiv.children[1].style.display = 'none';
-    childDiv.children[2].style.display = 'none';
     let promotionPriceElement = document.createElement('div');
     promotionPriceElement.classList.add('promotion-price');
     let inner = document.createElement('div');
     inner.classList.add('inner');
     if (childDiv.children[2]) {
       inner.innerHTML = `<p>${childDiv.children[2].innerText}</p>`;
+    } else {
+      inner.innerHTML = `<p></p>`;
     }
     promotionPriceElement.appendChild(inner);
     childDiv.insertBefore(promotionPriceElement, childDiv.children[0]);
@@ -138,11 +139,16 @@ export function addFavIcon(href) {
 }
 
 const createMenu = (menublock, dataArray) => {
-  for (let index = 0; index < dataArray.length; index++) {
+  for (let index = 1; index < dataArray.length; index++) {
 
-    let product = dataArray[index].Product;
-    let price = dataArray[index].Price;
-    let isOutOfStock = dataArray[index]['isOutOfStock'];
+    let rowData = dataArray[index];
+    if (!rowData || rowData.length === 0) {
+      continue;
+    }
+    let product = rowData.length > 0 ? rowData[0] : null;
+    let sku = rowData.length > 1 ? rowData[1] : null;
+    let price = rowData.length > 2 ? rowData[2] : null;
+    let isOutOfStock = rowData.length > 3 ? rowData[3] : null;
     if (product && !isOutOfStock && (!price || price === '')) {
       let heading = document.createElement('div');
       let headingWrapper = document.createElement('div');
@@ -154,9 +160,11 @@ const createMenu = (menublock, dataArray) => {
 
       let counter = index+1;
       while (counter < dataArray.length) {
-        let product2 = dataArray[counter].Product;
-        let price2 = dataArray[counter].Price;
-        let isOutOfStock2 = dataArray[counter]['isOutOfStock'];
+        let rowData2 = dataArray[counter];
+        let product2 = rowData2.length > 0 ? rowData2[0] : null;
+        let sku2 = rowData2.length > 1 ? rowData2[1] : null;
+        let price2 = rowData2.length > 2 ? rowData2[2] : null;
+        let isOutOfStock2 = rowData2.length > 3 ? rowData2[3] : null;
         if (product2 && price2 && price2 !== '' && !isOutOfStock2) {
           let heading = document.createElement('div');
           let name = document.createElement('div');
@@ -184,10 +192,16 @@ const updatePromotionPrices = (promotions, dataArray) => {
     let product = promotion.children[2] ? promotion.children[2].innerText.toLowerCase() : null;
     if (product) {
       for (let index=0; index < dataArray.length; index++) {
-        let name = dataArray[index].Product ? dataArray[index].Product.toLowerCase() : null;
-        if (name === product) {
-          let price = dataArray[index].Price;
-          promotion.children[0].children[0].children[0].innerText = '$' + price;
+        let rowData = dataArray[index];
+        if (!rowData || rowData.length === 0) {
+          continue;
+        }
+        let sku = rowData.length > 1 ? rowData[1].toLowerCase() : null;
+        if (sku === product) {
+          let price = rowData.length > 2 ? rowData[2] : null;
+          if (price) {
+            promotion.children[0].children[0].children[0].innerText = '$' + price;
+          }
         }
       }
     }
@@ -195,8 +209,7 @@ const updatePromotionPrices = (promotions, dataArray) => {
 }
 
 function personalizedContent(apiResponse, doc) {
-  let dataArray = apiResponse.data;
-
+  let dataArray = apiResponse.values;
   if (dataArray && dataArray.length > 0) {
     let menublock = doc.getElementsByClassName('main-menu')[0];
     menublock.innerHTML = '';
@@ -224,15 +237,12 @@ async function pollAPI(fn, url, doc, interval) {
   }
 }
 
-const poll = ( fn, doc, url ) => {
-  let targetApi = localStorage.getItem(url);
-  if (!targetApi) {
-    targetApi = 'https://main--screens-dmb--div8063.hlx.page/final-menu.json';
-  }
+const poll = ( fn, doc) => {
+  let targetApi = 'https://sheets.googleapis.com/v4/spreadsheets/1Iwke95E7vaAdfErTZPk-S5QXMQ0j3-BqCWvtI0zTn14/values/sheet1?key=AIzaSyBQRjtsLve-sGmkdMoOKypccTZEGaRK7E8';
 
   let interval = localStorage.getItem('franklinPollInterval');
   if (!interval) {
-    interval = 1000;
+    interval = 200;
   }
   console.log('Start poll...');
   setTimeout(function() {
