@@ -64,6 +64,10 @@ export function decorateMain(main) {
   editMenu(main);
 }
 
+const isOfferValid = (start, end) => {
+
+}
+
 const editMenu = (main) => {
   let menuItems = main.querySelector('.main-menu');
   [...menuItems.children].forEach((childDiv) => {
@@ -92,9 +96,14 @@ const editMenu = (main) => {
   })
   let offers = main.querySelector('.offers');
   [...offers.children].forEach((childDiv) => {
+    if (childDiv.children.length !== 3)
+      return;
     childDiv.children[1].style.display = 'none';
     childDiv.children[2].style.display = 'none';
     childDiv.children[0].children[0].children[3].id = 'offer-animation';
+    if (isOfferValid(childDiv.children[1].innerText, childDiv.children[2].innerText)) {
+      childDiv.style.display = 'none';
+    }
   })
   promotions.appendChild(offers);
   let container = document.createElement('div');
@@ -302,7 +311,7 @@ const processPromotionsPersonalization = (index, dataArray, doc) => {
 const processOffersBlockPersonalization = (index, dataArray, doc) => {
   let counter = index + 2;
   let rowData = dataArray[counter];
-  if (!rowData || rowData.length < 2) {
+  if (!rowData || rowData.length < 1) {
     return;
   }
   let offer = doc.getElementsByClassName('offers')[0];
@@ -316,17 +325,25 @@ const processOffersBlockPersonalization = (index, dataArray, doc) => {
 
 const processNoticesPersonalization = (index, dataArray, doc) => {
   let counter = index + 1;
-  let rowData = dataArray[counter];
-  if (!rowData || rowData.length < 1) {
-    return;
+  const elements = document.getElementsByClassName('personalized-notice');
+  while(elements.length > 0){
+    elements[0].parentNode.parentNode.removeChild(elements[0].parentNode);
   }
-  let notices = doc.getElementsByClassName('notices')[0];
-  if (rowData[0]) {
-    let newNotice = notices.children[0].cloneNode(true);
-    newNotice.children[0].innerText = rowData[0];
-    if (rowData[0] !== notices.children[0].children[0].innerText) {
-      notices.insertBefore(newNotice, notices.children[0]);
+  while(counter < dataArray.length) {
+    let rowData = dataArray[counter];
+    if (!rowData || rowData.length < 1) {
+      break;
     }
+    let notices = doc.getElementsByClassName('notices')[0];
+    if (rowData[0]) {
+      let newNotice = notices.children[0].cloneNode(true);
+      newNotice.children[0].innerText = rowData[0];
+      newNotice.children[0].classList.add('personalized-notice');
+      if (rowData[0] !== notices.children[0].children[0].innerText) {
+        notices.insertBefore(newNotice, notices.children[0]);
+      }
+    }
+    counter++;
   }
 }
 
@@ -383,7 +400,7 @@ async function pollAPI(fn1, fn2, url1, url2, doc) {
   finally {
     setTimeout(function() {
       pollAPI(fn1, fn2, url1, url2, doc);
-    }, 30000);
+    }, 10000);
   }
 }
 
