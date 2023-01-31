@@ -342,6 +342,7 @@ main .section.highlight {
   width: 50%;
   border-radius: 50%;
   left: -21%;
+  display: none;
 }
 
 .inner {
