@@ -367,3 +367,7 @@ main .section.highlight {
 .out-of-stock {
   color: red !important;
 }
+
+.menu-item {
+  font-size: 25px;
+}
