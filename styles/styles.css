@@ -369,5 +369,5 @@ main .section.highlight {
 }
 
 .menu-item {
-  font-size: 25px;
+  font-size: 25px !important;
 }
