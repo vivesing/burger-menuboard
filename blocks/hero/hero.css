@@ -47,10 +47,10 @@ main .hero picture {
     margin-block-end: 0;
     width: 100%;
     height: 100%;
-    top: 10%;
+    top: 20%;
     left: 0;
     font-weight: bolder;
-    font-size: 30pt;
+    font-size: 25pt;
     color: black;
 }
 
