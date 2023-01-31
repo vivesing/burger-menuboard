@@ -183,12 +183,21 @@ const createMenu = (menublock, dataArray) => {
           name.classList.add(`${sku2}-name`);
           name.classList.add('menu-item');
           name.innerText = product2;
-          if (isOutOfStock2)
-            name.classList.add('out-of-stock');
           let rate = document.createElement('div');
           rate.style['text-align'] = 'center';
           rate.classList.add(`${sku2}-price`);
-          rate.innerText = price2;
+          rate.innerText = '$ ' + price2;
+          let productStatus = document.createElement('div');
+          productStatus.classList.add('product-status');
+          if (isOutOfStock2){
+            name.classList.add('out-of-stock');
+            rate.classList.add('out-of-stock');
+            productStatus.classList.add('out-of-stock');
+            let outOfStockImgElement = document.createElement('img');
+            outOfStockImgElement.src = '../images/redcross.png';
+            productStatus.appendChild(outOfStockImgElement);
+          }
+          heading.appendChild(productStatus);
           heading.appendChild(name);
           heading.appendChild(rate);
           menublock.appendChild(heading);
