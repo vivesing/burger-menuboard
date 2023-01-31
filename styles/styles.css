@@ -284,7 +284,7 @@ main .section.highlight {
 .main-menu div {
   color: white;
   font-family: var(--body-font-family);
-  font-size: small;
+  font-size: initial;
   font-weight: normal;
 }
 
