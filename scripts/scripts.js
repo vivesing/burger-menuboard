@@ -181,6 +181,7 @@ const createMenu = (menublock, dataArray) => {
           let heading = document.createElement('div');
           let name = document.createElement('div');
           name.classList.add(`${sku2}-name`);
+          name.classList.add('menu-item');
           name.innerText = product2;
           if (isOutOfStock2)
             name.classList.add('out-of-stock');
