@@ -187,7 +187,7 @@ const createMenu = (menublock, dataArray) => {
           rate.style['text-align'] = 'center';
           rate.classList.add(`${sku2}-price`);
           if(price2 < 10){
-           price2 = ' '+price2; 
+           price2 = '  '+price2; 
           }
           rate.innerText = '$ ' + price2;
           let productStatus = document.createElement('div');
