@@ -190,7 +190,7 @@ const createMenu = (menublock, dataArray) => {
           if(price2 < 10){
            price2 = price2+'  '; 
           }
-          rate.innerText = '$' + price2;
+          rate.innerText = '$ ' + price2;
           let productStatus = document.createElement('div');
           productStatus.classList.add('product-status');
           if (isOutOfStock2){
