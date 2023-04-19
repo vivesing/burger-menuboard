@@ -431,7 +431,7 @@ async function loadLazy(doc) {
 
   // loadHeader(doc.querySelector('header'));
   // loadFooter(doc.querySelector('footer'));
-  await pollAPI(personalizedContent, applyPersonalization, 'https://sheets.googleapis.com/v4/spreadsheets/1Iwke95E7vaAdfErTZPk-S5QXMQ0j3-BqCWvtI0zTn14/values/sheet1?key=AIzaSyBQRjtsLve-sGmkdMoOKypccTZEGaRK7E8', 'https://sheets.googleapis.com/v4/spreadsheets/1RP6Bm4xtcEwWMDP3J2TMRAlEN7_DyuZCaa47GCh_6ZU/values/sheet1?key=AIzaSyBQRjtsLve-sGmkdMoOKypccTZEGaRK7E8', doc);
+  await pollAPI(personalizedContent, applyPersonalization, 'https://sheets.googleapis.com/v4/spreadsheets/1mfsZfi91-opdXH5TEhvMSiQcDmfyo32CTaMQ7dRXdsw/values/helix-products?key=AIzaSyCkxUKhvFn-6sjMaMKacZqPptQCDQ9Cpiw', 'https://sheets.googleapis.com/v4/spreadsheets/1RP6Bm4xtcEwWMDP3J2TMRAlEN7_DyuZCaa47GCh_6ZU/values/sheet1?key=AIzaSyBQRjtsLve-sGmkdMoOKypccTZEGaRK7E8', doc);
 
   loadCSS(`${window.hlx.codeBasePath}/styles/lazy-styles.css`);
   addFavIcon(`${window.hlx.codeBasePath}/styles/favicon.svg`);
