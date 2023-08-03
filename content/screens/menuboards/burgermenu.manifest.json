@@ -1,0 +1,39 @@
+{
+  "version": "3.0",
+  "contentDelivery": {
+    "providers": [
+      {
+        "name": "franklin",
+        "endpoint": "/"
+      }
+    ],
+    "defaultProvider": "franklin"
+  },
+  "timestamp": 1691056720763,
+  "entries": [
+    {
+      "path": "/content/screens/menuboards/burgermenu.html",
+      "timestamp": 1691056159000
+    },
+    {
+      "path": "/content/screens/menuboards/media_12f5eaa02fd5c76f06fb480b932ac3b832fc306b9.png",
+      "timestamp": 1689058513000
+    },
+    {
+      "path": "/content/screens/menuboards/media_18d7426dbda63169c94beca66983245987f438a0e.png",
+      "timestamp": 1689058510000
+    },
+    {
+      "path": "/content/screens/menuboards/media_103a083b9ecd2f28eb0bf213e0733f022708f318c.jpeg",
+      "timestamp": 1689058510000
+    },
+    {
+      "path": "/content/screens/menuboards/media_199b2d430aadda68bdb7d1b4bbbcc5500a120219e.jpeg",
+      "timestamp": 1689058510000
+    },
+    {
+      "path": "/content/screens/menuboards/media_1216e30280a61e10ebeca61fce3fcac757c11cd1f.png",
+      "timestamp": 1689058510000
+    }
+  ]
+}
