@@ -24,7 +24,7 @@ function buildHeroBlock(main) {
     let heroBlock = buildBlock('hero', { elems: [picture] });
     if (h1) {
       let textBackgroundImgElement = document.createElement('img');
-      textBackgroundImgElement.src = '../images/yellow-background.png';
+      textBackgroundImgElement.src = '/content/screens/assets/yellow-background.png';
       let textBackgroundImgWrapper = document.createElement('div');
       textBackgroundImgWrapper.className = 'hero-text-background';
       textBackgroundImgWrapper.appendChild(textBackgroundImgElement);
@@ -198,7 +198,7 @@ const createMenu = (menublock, dataArray) => {
             rate.classList.add('out-of-stock');
             productStatus.classList.add('out-of-stock');
             let outOfStockImgElement = document.createElement('img');
-            outOfStockImgElement.src = '../images/redcross.png';
+            outOfStockImgElement.src = '/content/screens/assets/redcross.png';
             productStatus.appendChild(outOfStockImgElement);
           }
           heading.appendChild(productStatus);
