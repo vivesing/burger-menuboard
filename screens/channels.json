@@ -1,0 +1,24 @@
+{
+  "channels": [
+    {
+      "manifestPath": "/content/screens/menuboards/burgermenu.manifest.json",
+      "lastModified": "2023-08-03T09:49:19.000Z",
+      "hierarchy": [
+        {
+          "title": "screens",
+          "path": "/content/screens"
+        },
+        {
+          "title": "menuboards",
+          "path": "/content/screens/menuboards"
+        }
+      ],
+      "externalId": "/content/screens/menuboards/burgermenu",
+      "title": "Burger Menuboard",
+      "liveUrl": "https://menuboard.aem-screens.com/content/screens/menuboards/burgermenu.html"
+    }
+  ],
+  "metadata": {
+    "providerType": "franklin"
+  }
+}
